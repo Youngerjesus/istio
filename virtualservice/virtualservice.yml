@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: cloud-run-gke-auth
+spec:
+  gateways:
+    - gke-system-gateway.knative-serving.svc.cluster.local
+  hosts:
+    - "*"
+  http:
+    - match:
+        - uri:
+            prefix: "/api/"
+      rewrite:
+        authority: backend.api.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.gke-system.svc.cluster.local
+    - match:
+        - uri:
+            prefix: "/"
+      rewrite:
+        authority: frontend.public.svc.cluster.local
+      route:
+        - destination:
+            host: cluster-local-gateway.gke-system.svc.cluster.local
