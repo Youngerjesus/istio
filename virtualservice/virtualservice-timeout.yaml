@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: my-productpage-rule
+  namespace: istio-system
+spec:
+  hosts:
+    - productpage.prod.svc.cluster.local # ignores rule namespace
+  http:
+    - timeout: 5s
+      route:
+        - destination:
+            host: productpage.prod.svc.cluster.local
