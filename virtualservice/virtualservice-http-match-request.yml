@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings-route
+spec:
+  hosts:
+    - ratings.prod.svc.cluster.local
+  http:
+    - match:
+        - headers:
+            end-user:
+              exact: jason
+          uri:
+            prefix: "/ratings/v2/"
+          ignoreUriCase: true
+      route:
+        - destination:
+            host: ratings.prod.svc.cluster.local
