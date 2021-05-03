@@ -2,6 +2,34 @@
 
 *** 
 
+## Service Architecture
+
+![](./istio-1.9.4/istio-service-architecture.png)
+
+istio의 service mesh 아키텍처는 크게 두 가지 부분으로 나뉜다. Control Plane 영역과 Data Plane 영역. 
+
+Control Plane은 서비스 프록시들을 관리하는 단일 지점으로 역할을 하고 직접적인 mesh에 있는 패킷을 다루지 않지만 패킷 전달에 대한 policy 들을 다룬다. 
+
+Data Plane은 클러스터 내 모든 요청 패킷을 intercept 해서 라우팅을 해준다던지 health checking, authentication / authorization, load balancing 과 같은 역할을 해준다.  
+
+크게 하는 역할은 다음과 같다. 
+
+Control Plane
+- monitoring
+- policy configuration
+- service discovery
+- identity management
+- network topology
+
+Data Plane
+- packet forwarding
+- load balancing
+- routing
+- caching
+- policy enforcement
+
+***
+
 ## Gateway 
 
 Gateway는 외부로부터 트래픽을 받는 최앞단으로 여기서 지정할 값은 트래픽을 받을 호스트 명과
@@ -147,3 +175,48 @@ Reference: [Istio Traffic management](https://bcho.tistory.com/1367)
 ***
 
 ## Policy
+
+***
+
+## JWTRule
+
+Istio 에서 인증 정책으로 JWT 검증을 할 수 있다. 
+
+여기서는 JWT과 검증에 대해서 알고있다고 가정하고 JWTRule에서 정의할 수 있는 속성들을 살펴보갰다.
+
+예제는 다음과 같다. 
+
+```yaml
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: api-origin-auth
+  namespace: gke-system
+spec:
+  targets:
+    - name: istio-ingress
+      ports:
+        - number: 80
+        - number: 443
+  origins:
+    - jwt:
+        issuer: "https://securetoken.google.com/$GOOGLE_CLOUD_PROJECT"
+        audiences:
+          - "$GOOGLE_CLOUD_PROJECT"
+        jwksUri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+        fromHeaders:
+          - name: Authorization
+            prefix: "Bearer"
+        trigger_rules:
+          - excluded_paths:
+              - exact: /api/healthz
+            included_paths:
+              - prefix: /api/
+``` 
+- issuer:만 반드시 등록해야 하는 속성으로 JWT를 발급한 주체를 말한다.
+- audiences:를 통해 등록된 사람들만 서비스 요청이 가능하게 할 수 있다.
+- jwksUri:를 통해 검증을 할 publicKey 위치를 등록할 수 있다.
+- jwtHeaders:를 통해 요청 헤더에 있는 토큰 위치를 기술할 수 있다. 
+ 
+
+

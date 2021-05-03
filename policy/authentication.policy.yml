@@ -15,9 +15,11 @@ spec:
         audiences:
           - "$GOOGLE_CLOUD_PROJECT"
         jwksUri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+        fromHeaders:
+          - name: Authorization
+            prefix: "Bearer"
         trigger_rules:
           - excluded_paths:
               - exact: /api/healthz
             included_paths:
               - prefix: /api/
-  principalBinding: USE_ORIGIN
