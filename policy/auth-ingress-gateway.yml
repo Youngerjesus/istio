@@ -1,0 +1,21 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: api-auth
+  namespace: istio-system
+spec:
+  targets:
+    - name: istio-ingressgateway
+      ports:
+        - number: 80
+        - number: 443
+  origins:
+    - jwt:
+        issuer: "https://securetoken.google.com/$GOOGLE_CLOUD_PROJECT"
+        jwksUri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+        fromHeaders:
+          - name: Authorization
+            prefix: "Bearer"
+        trigger_rules:
+            included_paths:
+              - prefix: /api
