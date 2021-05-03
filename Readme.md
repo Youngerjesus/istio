@@ -4,7 +4,7 @@
 
 ## Service Architecture
 
-![](./istio-1.9.4/istio-service-architecture.png)
+![](./istio-1.9.4/service-architecture.png)
 
 istio의 service mesh 아키텍처는 크게 두 가지 부분으로 나뉜다. Control Plane 영역과 Data Plane 영역. 
 
@@ -27,6 +27,60 @@ Data Plane
 - routing
 - caching
 - policy enforcement
+
+각 구성 요소를 살펴보면 다음과 같다.
+ 
+#### Pilot 
+
+파일럿은 Envoy가 서비스의 엔드포인트를 알 수 있도록 서비스 디스커버리 기능을 제공해준다.
+
+그리고 파일럿은 Envoy의 통신 즉 서비스간의 트래픽의 경로를 통제해주는 역할을 해줄 수 있다.
+
+이 외에도 Envoy가 하는 기능인 retry, timeout, circuit breaker 같은 설정 정보를 제공해주는 역할을 한다.
+
+#### Mixer 
+
+믹서가 하는 일은 요청에 대한 정책을 통제하거나 모니터링 지표의 수집을 한다.
+
+서비스가 처리량 이상만큼 요청을 못받도록 설정하거나 특정 헤더값이 일치해야 요청을 받도록 하는 정책 기능을 제공해준다.
+
+또한 서비스의 응답 시간이나 평균 처리량 같은 다양한 지표를 수집한다.
+
+#### Citadel
+
+시타델은 보안에 관련된 기능을 제공한다.
+
+서비스간 인증이나 인가를 담당하고 서비스간 통신에 TLS을 이용해서 암호화 하도록 제공해준다.
+
+#### Galley
+
+Galley는 Kubernetes의 YAML 파일을 해석하여 Istio가 이해하는 형식으로 변환하는 일을 맡고 있습니다. 
+
+Galley는 다른 구성 데이터를 Istio가 이해하는 공통 형식으로 변환하기 때문에 Kubernetes가 아닌 다른 환경과의 작업을 가능하게 합니다.
+
+#### Sidecar Proxy 
+
+Istio의 Envoy Proxy는 사이드카 형식으로 어플리케이션 컨테이너와 같이 쿠버네티스 pod에 자동으로 배포된다.  
+
+Envoy Proxy는 기존 프록시의 기능인 L4 뿐 아니라 L7 기능도 지원하면서 HTTP 뿐 아니라 HTTP 2.0 TCP gRPC등 다양한 기능을 제공한다.
+
+이런 Envoy Proxy는 다양한 기능은 다음과 같다.
+
+- HTTP, TCP, gRPC 프로토콜 지원
+
+- HTTP2 지원
+
+- 서비스간 통신에 TLS client certification 지원
+
+- Auto retry, circuit breaker, 부하량 제한 등 다양한 로드 밸런싱 기능 지원
+
+- 모니터링 및 추적 기능 제공 및 마이크로서비스간 분산 트랜잭션 성능 측정 제공해서 서비스 간 가시성(Visibility)를 제공
+
+- Dynamic Configuration 지원을 통해서 중앙 레파지토리에서 설정 정보를 읽어와서 서버의 재시작 없이 라우팅 기능을 제공해준다.
+
+- L7 라우팅 지원
+
+
 
 ***
 
