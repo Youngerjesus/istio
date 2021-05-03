@@ -224,13 +224,48 @@ VirtualService의 개념을 이해할때 헷갈릴 수 있는데 다음 두 가�
 Reference: [Istio Traffic management](https://bcho.tistory.com/1367)
 ***
 
-## Destination Rule 
+## DestinationRule 
 
+Virtual Service 가 쿠버네티스로 들어오는 트래픽을 어떤 서비스로 전달할 것인지 결정했다면
+
+DestinationRule 은 서비스로 들어온 트래픽을 어떤 Pod 에게 어떻게 전달할 것인지를 결정할 것인지를 정하는 문제다. 
+
+예제는 다음과 같다. 
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: my-destination-rule
+spec:
+  host: my-svc
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+  - name: v3
+    labels:
+      version: v3
+```  
+- my-svc (my-svc.{namespace}.svc.cluster.local) 서비스로 들어오는 트래픽을 어떻게 pod로 전달할지를 정의했다.
+- 이를 subset 을 통해 pod의 version 별로 그룹핑을 했다. 
+- trafficPolicy: loaBalancer: 를 보면 로드밸런서 전략을 v1의 경우 RANDOM 으로 정했고 
+  v2의 경우에는 ROUND_ROBIN으로 정했다. 이 외에도 LEAST_CONN 이라고 해서 두개의 랜덤 Pod 중 요청이 더 적은쪽을 선택하도록 할 수 있고
+  PASSTHROUGH 옵션을 통해 로드밸런싱을 수행하지 않고 호출자가 요청한 원래 IP주소로 연결할 수 있다. 
+  
 ***
 
-## Policy
 
-***
+
 
 ## JWTRule
 
